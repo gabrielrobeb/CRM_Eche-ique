@@ -47,7 +47,7 @@ function CustomTooltip({
           <span className="tabular-nums font-semibold text-foreground">
             {datum.count}
           </span>{" "}
-          deals
+          consultas
         </p>
         <p>
           <span className="tabular-nums font-semibold text-foreground">
@@ -65,16 +65,16 @@ export function PipelineChart({ data }: PipelineChartProps) {
     <Card className="surface-card">
       <CardHeader className="space-y-1">
         <CardTitle className="text-base font-semibold tracking-tight font-heading">
-          Pipeline de Ventas
+          Seguimiento de consultas
         </CardTitle>
         <p className="text-xs text-muted-foreground">
-          Distribucion de deals por etapa
+          Distribución de consultas por etapa
         </p>
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-12">
-            No hay deals en el pipeline
+            Todavía no hay consultas en seguimiento
           </p>
         ) : (
           <ResponsiveContainer width="100%" height={320}>

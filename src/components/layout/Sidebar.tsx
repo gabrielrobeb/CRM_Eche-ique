@@ -49,11 +49,11 @@ function construirSecciones(esAdmin: boolean): NavSection[] {
   const si = (activo: boolean, item: NavItem): NavItem[] => (activo ? [item] : []);
 
   return [
-    { items: [{ href: "/", label: "Dashboard", icon: LayoutDashboard }] },
+    { items: [{ href: "/", label: "Resumen del estudio", icon: LayoutDashboard }] },
     {
-      title: "Operaciones",
+      title: "Atención del estudio",
       items: [
-        { href: "/pipeline", label: "Pipeline", icon: Kanban },
+        { href: "/pipeline", label: "Consultas", icon: Kanban },
         { href: "/contacts", label: "Contactos", icon: Users },
         { href: "/conversations", label: "Conversaciones", icon: MessageSquare },
         ...si(moduloActivo("plantillas"), { href: "/plantillas", label: "Plantillas", icon: FileText }),

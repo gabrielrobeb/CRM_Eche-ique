@@ -1,18 +1,48 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Menu } from "lucide-react";
+import { useState, useSyncExternalStore } from "react";
+import { Search, Menu, Moon, Sun } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MobileNav } from "./MobileNav";
 import { NotificationBell } from "./NotificationBell";
 
+function subscribeTheme(callback: () => void) {
+  const syncFromStorage = (event: StorageEvent) => {
+    if (event.key !== "crm-tema" && event.key !== null) return;
+    document.documentElement.classList.toggle("dark", event.newValue !== "claro");
+    callback();
+  };
+  window.addEventListener("crm-tema-cambio", callback);
+  window.addEventListener("storage", syncFromStorage);
+  return () => {
+    window.removeEventListener("crm-tema-cambio", callback);
+    window.removeEventListener("storage", syncFromStorage);
+  };
+}
+
+function isDark() {
+  return document.documentElement.classList.contains("dark");
+}
+
 export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
+  const dark = useSyncExternalStore(subscribeTheme, isDark, () => true);
+
+  function toggleTheme() {
+    const nextDark = !isDark();
+    document.documentElement.classList.toggle("dark", nextDark);
+    try {
+      localStorage.setItem("crm-tema", nextDark ? "oscuro" : "claro");
+    } catch {
+      // El cambio sigue funcionando durante esta visita si el navegador bloquea el almacenamiento.
+    }
+    window.dispatchEvent(new Event("crm-tema-cambio"));
+  }
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 box-content pt-[env(safe-area-inset-top)] items-center gap-3 border-b border-border bg-card/95 backdrop-blur-md shadow-sm px-4 md:px-8">
+    <header className="sticky top-0 z-30 flex h-14 box-content pt-[env(safe-area-inset-top)] items-center gap-3 border-b border-border bg-background px-4 md:px-8">
       <Sheet>
         <SheetTrigger
           render={
@@ -42,6 +72,17 @@ export function Header() {
       </div>
 
       <NotificationBell />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={toggleTheme}
+        aria-label={dark ? "Activar modo claro" : "Activar modo oscuro"}
+        title={dark ? "Activar modo claro" : "Activar modo oscuro"}
+        className="shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+      >
+        {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      </Button>
     </header>
   );
 }

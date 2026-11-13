@@ -9,7 +9,8 @@ import { getConfig } from "@/lib/config";
 import { getAgentConfig } from "./config";
 import { renderContexto, renderSystemPrompt } from "./prompt";
 import { executeTool, getEnabledToolDefinitions, type ToolContext } from "./tools";
-import { getOpenRouterClient, getAgentModel, hasOpenRouterKey } from "./openrouter";
+import { getAgentClient, getAgentModel, hasAgentKey } from "./provider";
+import { registrarDatosConfirmados } from "./registro";
 
 const MAX_TOOL_ROUNDS = 6;
 const HISTORY_LIMIT = 30;
@@ -55,6 +56,20 @@ export async function runAgentForConversation(conversationId: string): Promise<R
   if (collapsed === "already_replied") return { ok: false, reason: "last_message_is_assistant" };
 
   const tools = await getEnabledToolDefinitions(config.enabledTools);
+  const client = getAgentClient();
+  const ctx: ToolContext = {
+    contactId: contact.id, contactPhone: contact.phone,
+    conversationId: conversation.id, channel,
+  };
+  const toolRegistro = tools.find((t) => t.type === "function" && t.function.name === "actualizar_contacto");
+  const registro = toolRegistro?.type === "function" ? await registrarDatosConfirmados({
+    client, model: config.model, tool: toolRegistro, historial: collapsed,
+    contexto: await renderContexto(contact.id), instrucciones: config.systemPrompt,
+    guardar: (args) => executeTool("actualizar_contacto", args, ctx),
+    guardarResumen: config.enabledTools.includes("resumen_lead")
+      ? (resumen) => executeTool("resumen_lead", { resumen }, ctx) : undefined,
+  }) : null;
+  if (registro && !registro.ok) console.error("[agente] fallo registrando datos confirmados:", registro.error);
   const puedeAsignar = tools.some((t) => t.type === "function" && t.function.name === "asignar_asesor");
 
   const [contexto, equipo] = await Promise.all([
@@ -68,16 +83,9 @@ export async function runAgentForConversation(conversationId: string): Promise<R
       content: renderSystemPrompt(config.systemPrompt, { channel: conversation.provider === "simulador" ? "simulador" : channel }) + contexto + equipo,
     },
     ...collapsed,
+    ...(registro && !registro.ok ? [{ role: "system" as const, content: "El registro previo no se completo. Guarda los datos confirmados con actualizar_contacto antes de responder; no afirmes haberlos guardado hasta que la herramienta confirme exito." }] : []),
   ];
-  const ctx: ToolContext = {
-    contactId: contact.id,
-    contactPhone: contact.phone,
-    conversationId: conversation.id,
-    channel,
-  };
-
-  const client = getOpenRouterClient();
-  let toolCalls = 0;
+  let toolCalls = registro?.guardado ? 1 : 0;
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
     const completion = await client.chat.completions.create({
@@ -198,7 +206,7 @@ async function loadHistory(conversationId: string): Promise<CollapsedHistory> {
 }
 
 export const agentConfig = {
-  hasApiKey: hasOpenRouterKey(),
+  hasApiKey: hasAgentKey(),
   model: getAgentModel(),
   maxToolRounds: MAX_TOOL_ROUNDS,
   historyLimit: HISTORY_LIMIT,

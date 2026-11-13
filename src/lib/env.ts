@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { modoLocal } from "@/lib/modo-local";
+import { hasAgentKey } from "@/lib/agent/provider";
 
 /**
  * Variables de entorno, validadas una sola vez y bajo demanda (no al importar: el build
@@ -48,9 +49,12 @@ export const esquemaEnv = z.object({
   LEADS_WEBHOOK_SECRET: opcional,
   SWEEP_INTERVAL_MIN: z.preprocess(vacioComoAusente, z.coerce.number().int().min(1).optional()),
 
-  // --- Agente IA (OpenRouter) ---
+  // --- Agente IA ---
+  AGENT_PROVIDER: z.preprocess(vacioComoAusente, z.enum(["openai", "openrouter"]).optional()),
+  OPENAI_API_KEY: opcional,
   OPENROUTER_API_KEY: opcional,
   AGENT_MODEL: opcional,
+  AGENDA_URL: z.preprocess(vacioComoAusente, z.union([z.literal("[LINK]"), z.string().url().refine((v) => /^https?:\/\//.test(v), "AGENDA_URL debe usar http o https")]).optional()),
 
   // --- Zernio (WhatsApp + Instagram + Messenger) ---
   ZERNIO_API_KEY: opcional,
@@ -124,7 +128,7 @@ export function envFaltantes(): string[] {
 export function capacidades() {
   const e = process.env;
   return {
-    agente: Boolean(e.OPENROUTER_API_KEY),
+    agente: hasAgentKey(),
     zernio: Boolean(e.ZERNIO_API_KEY),
     metaDirecto: Boolean(e.WHATSAPP_ACCESS_TOKEN && e.WHATSAPP_PHONE_NUMBER_ID),
     push: Boolean(e.NEXT_PUBLIC_VAPID_PUBLIC_KEY && e.VAPID_PRIVATE_KEY),

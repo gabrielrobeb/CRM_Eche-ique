@@ -127,7 +127,7 @@ export function Reportes({ reporte }: { reporte: Reporte }) {
         <Tile titulo="Conversaciones nuevas" valor={compacto(kpis.conversacionesNuevas.actual)} sub={<Delta kpi={kpis.conversacionesNuevas} />} />
         <Tile titulo="Mensajes recibidos" valor={compacto(kpis.mensajesEntrantes.actual)} sub={<Delta kpi={kpis.mensajesEntrantes} />} />
         <Tile
-          titulo="Operaciones ganadas"
+          titulo="Servicios contratados"
           valor={compacto(kpis.operacionesGanadas.actual)}
           sub={
             <span className="text-[11px] text-muted-foreground">
@@ -138,7 +138,7 @@ export function Reportes({ reporte }: { reporte: Reporte }) {
         <Tile
           titulo="Tasa de cierre"
           valor={kpis.tasaCierre === null ? "—" : `${kpis.tasaCierre}%`}
-          sub={<span className="text-[11px] text-muted-foreground">{kpis.tasaCierre === null ? "sin cierres en el periodo" : "ganadas sobre cerradas"}</span>}
+          sub={<span className="text-[11px] text-muted-foreground">{kpis.tasaCierre === null ? "sin cierres en el periodo" : "contratadas sobre consultas cerradas"}</span>}
         />
         <Tile
           titulo="Respondido por el agente"
@@ -231,13 +231,13 @@ export function Reportes({ reporte }: { reporte: Reporte }) {
         <Card className="surface-card lg:col-span-2">
           <CardHeader className="space-y-1">
             <CardTitle className="text-base font-semibold tracking-tight font-heading">Embudo del pipeline</CardTitle>
-            <p className="text-xs text-muted-foreground">Operaciones abiertas y cerradas por etapa (total, no solo el periodo)</p>
+            <p className="text-xs text-muted-foreground">Consultas abiertas y cerradas por etapa (total, no solo el periodo)</p>
           </CardHeader>
           <CardContent>
             {reporte.embudo.length === 0 ? (
               <Vacio texto="No hay pipeline configurado." />
             ) : reporte.embudo.every((e) => e.cantidad === 0) ? (
-              <Vacio texto="Todavia no hay operaciones en el pipeline." />
+              <Vacio texto="Todavía no hay consultas en seguimiento." />
             ) : (
               <ResponsiveContainer width="100%" height={Math.max(200, reporte.embudo.length * 36)}>
                 <BarChart data={reporte.embudo} layout="vertical" margin={{ top: 0, right: 120, bottom: 0, left: 8 }} barSize={18}>
@@ -251,7 +251,7 @@ export function Reportes({ reporte }: { reporte: Reporte }) {
                         <div className="rounded-lg border border-border bg-card shadow-lg px-3 py-2 text-[12px]">
                           <p className="font-medium mb-1">{e.etapa}</p>
                           <p className="text-muted-foreground">
-                            <span className="font-semibold text-foreground">{e.cantidad}</span> operaciones ·{" "}
+                            <span className="font-semibold text-foreground">{e.cantidad}</span> consultas ·{" "}
                             <span className="font-semibold text-foreground">{formatCurrency(e.valor)}</span>
                           </p>
                         </div>
@@ -259,7 +259,7 @@ export function Reportes({ reporte }: { reporte: Reporte }) {
                     }}
                     cursor={{ fill: "var(--muted)", opacity: 0.4 }}
                   />
-                  <Bar name="Operaciones" dataKey="cantidad" radius={[0, 4, 4, 0]}>
+                  <Bar name="Consultas" dataKey="cantidad" radius={[0, 4, 4, 0]}>
                     {reporte.embudo.map((e) => (
                       <Cell key={e.etapa} fill={e.color} />
                     ))}

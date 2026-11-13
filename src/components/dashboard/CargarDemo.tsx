@@ -12,7 +12,7 @@ export function CargarDemo() {
   const [ocupado, setOcupado] = useState(false);
 
   const cargar = async () => {
-    if (!confirm("Cargar contactos, conversaciones y operaciones de demostracion? Son datos inventados y se pueden borrar despues.")) return;
+    if (!confirm("Cargar contactos, conversaciones y consultas de demostración? Son datos inventados y se pueden borrar despues.")) return;
     setOcupado(true);
     try {
       const res = await fetch("/api/seed/demo", { method: "POST" });

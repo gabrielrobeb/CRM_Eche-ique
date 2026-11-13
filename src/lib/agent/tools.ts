@@ -304,6 +304,15 @@ async function asignarAsesor(args: { asesor?: string; motivo?: string }, ctx: To
 
 function toolsGenericas(): ToolAgente[] {
   const campos = camposContacto();
+  const esquemaCampos = {
+    type: "object",
+    properties: Object.fromEntries(campos.map((campo) => [campo.clave, {
+      type: campo.tipo === "numero" ? "number" : campo.tipo === "booleano" ? "boolean" : "string",
+      description: [campo.etiqueta, campo.ayuda, campo.agente?.descripcion].filter(Boolean).join(". "),
+      ...(campo.opciones ? { enum: campo.opciones } : {}),
+    }])),
+    additionalProperties: false,
+  };
   const etiquetaAsesor = getConfig().roles.etiquetaAsesor.toLowerCase();
   const descripcionCampos =
     campos.length > 0
@@ -345,9 +354,8 @@ function toolsGenericas(): ToolAgente[] {
             telefono: { type: "string" },
             notas: { type: "string", description: "Observacion breve para el equipo." },
             campos: {
-              type: "object",
+              ...esquemaCampos,
               description: "Pares clave: valor de los campos personalizados. " + descripcionCampos,
-              additionalProperties: true,
             },
           },
           additionalProperties: false,

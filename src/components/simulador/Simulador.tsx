@@ -48,6 +48,19 @@ interface Etapa {
  * el agente fue cambiando en el CRM (etapa, campos, resumen, actividades).
  */
 export function Simulador() {
+  const [enlace, setEnlace] = useState("");
+  const [compartiendo, setCompartiendo] = useState(false);
+  async function compartir() {
+    setCompartiendo(true);
+    try {
+      const res = await fetch("/api/simulador/enlace", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setEnlace(new URL(data.path, window.location.origin).href);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo generar el enlace");
+    } finally { setCompartiendo(false); }
+  }
   const [canal, setCanal] = useState<Channel>("whatsapp");
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [contactId, setContactId] = useState<string | null>(null);
@@ -144,6 +157,11 @@ export function Simulador() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-3 flex flex-wrap items-center gap-3">
+          <Button variant="outline" onClick={compartir} disabled={compartiendo}>{compartiendo ? "Generando…" : "Crear enlace para el cliente"}</Button>
+          <p className="text-sm text-muted-foreground">Solo chat, sin acceso al CRM. Válido por 7 días.</p>
+          {enlace && <div className="flex w-full flex-wrap items-center gap-2"><Input aria-label="Enlace de prueba para el cliente" readOnly value={enlace} onFocus={(event) => event.target.select()} className="min-w-0 flex-1" /><Button variant="outline" onClick={async () => { try { await navigator.clipboard.writeText(enlace); toast.success("Enlace copiado"); } catch { toast.message("Selecciona el enlace y cópialo manualmente."); } }}>Copiar enlace</Button></div>}
+        </div>
         <Card className="lg:col-span-2 flex flex-col min-h-[560px]">
           <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
             <CardTitle className="text-base flex items-center gap-2">
@@ -278,7 +296,7 @@ export function Simulador() {
                       {etapaActual.name}
                     </span>
                   ) : (
-                    <p className="text-muted-foreground">Sin operacion todavia</p>
+                    <p className="text-muted-foreground">Sin consulta en seguimiento todavía</p>
                   )}
                 </div>
                 <div>

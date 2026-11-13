@@ -3,6 +3,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -52,14 +54,7 @@
   --shadow-lg: var(--shadow-lg);
 }
 
-/*
-  Builder CRM - paleta base (config/cliente.ts la pisa en runtime)
-  Filosofia 60/30/10:
-    60% Blanco #FFFFFF (lienzo limpio, mensajeria estilo GHL/Intercom)
-    30% Navy #0A1628 (texto, sidebar, headings)
-    10% Verde teal base #2E4A47 (CTAs y acciones primarias, color del logo)
-  Light = blanco puro, sidebar negro permanente, teal en CTAs.
-*/
+/* Superficies oscuras con acento de marca. */
 
 :root {
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -67,53 +62,53 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Surfaces */
-  --background: #EEF1F6;
-  --foreground: #0A1628;
-  --card: #FFFFFF;
-  --card-foreground: #0A1628;
-  --popover: #FFFFFF;
-  --popover-foreground: #0A1628;
+  --background: #101012;
+  --foreground: #f0eff1;
+  --card: #171719;
+  --card-foreground: #f0eff1;
+  --popover: #1c1c1f;
+  --popover-foreground: #f0eff1;
 
-  /* Primary = verde teal base (CTAs por defecto en shadcn) */
-  --primary: #2E4A47;
+  /* Acciones principales */
+  --primary: #e9470a;
   --primary-foreground: #FFFFFF;
 
-  /* Secondary = zinc claro */
-  --secondary: #F4F4F5;
-  --secondary-foreground: #0A1628;
+  /* Superficies secundarias */
+  --secondary: #242427;
+  --secondary-foreground: #f0eff1;
 
-  /* Muted = zinc claro (un toque mas fresco para diferenciar columnas) */
-  --muted: #E8EBF1;
-  --muted-foreground: #52525B;
+  /* Texto secundario y fondos de controles */
+  --muted: #242427;
+  --muted-foreground: #aaa9b0;
 
-  /* Accent = teal suave */
-  --accent: #ECF3F2;
-  --accent-foreground: #1A332F;
+  /* Acento discreto */
+  --accent: #31211b;
+  --accent-foreground: #ffb79a;
 
   --destructive: #DC2626;
   --destructive-foreground: #FFFFFF;
 
-  --border: #D7DBE3;
-  --input: #D7DBE3;
-  --ring: #2E4A47;
+  --border: #343439;
+  --input: #3d3d43;
+  --ring: #f2632b;
 
   /* Charts: brand-aligned */
-  --chart-1: #2E4A47;
-  --chart-2: #0A1628;
-  --chart-3: #6FA29D;
+  --chart-1: #f15a24;
+  --chart-2: #cfb7a8;
+  --chart-3: #e6966f;
   --chart-4: #1F9B73;
   --chart-5: #1E3A5F;
 
   --radius: 0.75rem;
 
-  /* Sidebar = negro neutro permanente (estilo Attio/SHARP) */
-  --sidebar: #0F1419;
-  --sidebar-foreground: #E8EDF5;
+  /* Navegacion */
+  --sidebar: #09090b;
+  --sidebar-foreground: #f0eff1;
   --sidebar-foreground-muted: rgba(232, 237, 245, 0.55);
   --sidebar-primary: #6FA29D;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: rgba(111, 162, 157, 0.14);
-  --sidebar-accent-foreground: #ECF3F2;
+  --sidebar-accent: #252124;
+  --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.06);
   --sidebar-ring: #6FA29D;
 
@@ -123,11 +118,44 @@
   --warning-foreground: #FFFFFF;
 
   /* Elevation scale (navy-tinted) */
-  --shadow-xs: 0 1px 2px rgba(10, 22, 40, 0.04);
-  --shadow-sm: 0 1px 2px rgba(10, 22, 40, 0.05), 0 1px 3px rgba(10, 22, 40, 0.06);
-  --shadow-md: 0 2px 4px rgba(10, 22, 40, 0.04), 0 4px 12px rgba(10, 22, 40, 0.08);
-  --shadow-lg: 0 4px 8px rgba(10, 22, 40, 0.04), 0 12px 28px rgba(10, 22, 40, 0.12);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.18);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.24);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.32);
 }
+
+/* La configuracion de marca inyecta colores en SSR; estas superficies son oscuras. */
+:root:root:root {
+  --accent: #31211b;
+  --accent-foreground: #ffb79a;
+  --sidebar-foreground: #f0eff1;
+  --sidebar-foreground-muted: #aaa9b0;
+}
+
+:root:root:root:not(.dark) {
+  color-scheme: light;
+  --background: #f5f4f2;
+  --foreground: #1c1c20;
+  --card: #ffffff;
+  --card-foreground: #1c1c20;
+  --popover: #ffffff;
+  --popover-foreground: #1c1c20;
+  --secondary: #eeece9;
+  --secondary-foreground: #29272a;
+  --muted: #efeeec;
+  --muted-foreground: #625f62;
+  --accent: #fff0e9;
+  --accent-foreground: #8e2b08;
+  --border: #dedbd8;
+  --input: #d6d2ce;
+  --chart-2: #394758;
+  --shadow-xs: 0 1px 2px rgba(32, 24, 20, 0.04);
+  --shadow-sm: 0 1px 3px rgba(32, 24, 20, 0.06);
+  --shadow-md: 0 4px 12px rgba(32, 24, 20, 0.08);
+  --shadow-lg: 0 12px 28px rgba(32, 24, 20, 0.12);
+}
+
+:root.dark { color-scheme: dark; }
 
 @layer base {
   * {
@@ -145,12 +173,12 @@
     letter-spacing: -0.01em;
   }
   *:focus-visible {
-    outline: 2px solid #2E4A47;
+    outline: 2px solid #f2632b;
     outline-offset: 2px;
   }
   ::selection {
-    background: rgba(46, 74, 71, 0.30);
-    color: #0A1628;
+    background: rgba(233, 71, 10, 0.4);
+    color: #ffffff;
   }
   /* Scrollbar fina estilo Silicon Valley */
   ::-webkit-scrollbar {
@@ -171,6 +199,12 @@
 }
 
 @layer utilities {
+  .app-workspace {
+    background: radial-gradient(ellipse 78% 380px at 30% 0%, rgba(136, 46, 18, 0.24), transparent 72%), var(--background);
+  }
+  :root:not(.dark) .app-workspace {
+    background: radial-gradient(ellipse 78% 380px at 30% 0%, rgba(233, 71, 10, 0.055), transparent 72%), var(--background);
+  }
   .transition-base {
     transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
   }

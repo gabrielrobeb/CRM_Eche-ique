@@ -123,7 +123,7 @@ export function PipelineHeader({
           </DropdownMenu>
 
           <span className="text-sm text-muted-foreground tabular-nums">
-            {dealCount} {dealCount === 1 ? "oportunidad" : "oportunidades"}
+            {dealCount} {dealCount === 1 ? "consulta" : "consultas"}
           </span>
         </div>
 
@@ -182,7 +182,7 @@ export function PipelineHeader({
                 id="new-pipeline-name"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="Ej: Funnel redes sociales"
+                placeholder="Ej: Consultas de familia"
                 autoFocus
               />
               <p className="text-xs text-muted-foreground">

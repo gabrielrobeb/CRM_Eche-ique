@@ -236,7 +236,7 @@ export function AgentSettings() {
           type="button"
           onClick={() => setScope("global")}
           className={cn(
-            "inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors cursor-pointer",
+            "inline-flex items-center gap-2 h-9 px-3.5 rounded-lg text-xs font-medium transition-colors cursor-pointer",
             scope === "global"
               ? "bg-primary text-primary-foreground"
               : "bg-muted/50 text-muted-foreground hover:bg-muted"
@@ -251,7 +251,7 @@ export function AgentSettings() {
             type="button"
             onClick={() => setScope(c)}
             className={cn(
-              "inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors cursor-pointer",
+              "inline-flex items-center gap-2 h-9 px-3.5 rounded-lg text-xs font-medium transition-colors cursor-pointer",
               scope === c
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted/50 text-muted-foreground hover:bg-muted"
@@ -294,16 +294,16 @@ export function AgentSettings() {
 
       {/* System prompt */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <Label className="text-sm font-semibold flex items-center gap-2">
               <Bot className="h-4 w-4" />
-              System prompt
+              Instrucciones del agente
             </Label>
             <p className="text-xs text-muted-foreground mt-0.5">
               Define rol, reglas y estilo del agente. Usa{" "}
               <code className="bg-muted px-1 rounded">{"{{fecha}}"}</code> para
-              insertar la fecha de hoy en formato es-AR.
+              insertar automáticamente la fecha de hoy.
             </p>
           </div>
           <span
@@ -314,7 +314,7 @@ export function AgentSettings() {
                 : "bg-primary/10 text-primary border border-primary/20"
             )}
           >
-            {isUsingDefaultPrompt ? "Default" : "Personalizado"}
+            {isUsingDefaultPrompt ? "Configuración base" : "Personalizado"}
           </span>
         </div>
 
@@ -322,7 +322,7 @@ export function AgentSettings() {
           value={systemPrompt}
           onChange={(e) => setSystemPrompt(e.target.value)}
           rows={20}
-          className="font-mono text-xs resize-y"
+          className="min-h-96 bg-background/70 font-mono text-xs leading-relaxed resize-y"
           spellCheck={false}
           autoComplete="off"
           autoCorrect="off"
@@ -333,11 +333,11 @@ export function AgentSettings() {
           data-lt-active="false"
         />
 
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-[11px] text-muted-foreground tabular-nums">
             {systemPrompt.length} caracteres
           </p>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               type="button"
               variant="outline"
@@ -442,7 +442,7 @@ export function AgentSettings() {
 
       <Separator />
 
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs text-muted-foreground">
           Para volver a la configuracion de fabrica del agente.
         </p>

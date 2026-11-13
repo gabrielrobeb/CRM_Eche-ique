@@ -357,7 +357,7 @@ function AddMemberDialog({
               </Select>
               <p className="text-xs text-muted-foreground">
                 {role === "asesor"
-                  ? "Ve solo los contactos asignados a el, y sus conversaciones, operaciones y actividades."
+                  ? "Ve solo los contactos asignados a el, y sus conversaciones, consultas y actividades."
                   : "Ve todo y gestiona equipo, canales, agente y automatizaciones."}
               </p>
             </div>

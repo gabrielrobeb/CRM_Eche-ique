@@ -6,7 +6,7 @@ import { resolveDefaultTenantId } from "@/lib/tenants";
 import { CHANNELS, type Channel } from "@/lib/channels/types";
 import { getEnabledToolNames, nombresDeTools } from "./tools";
 import { getDefaultSystemPromptTemplate, getGlobalSystemPromptTemplate } from "./prompt";
-import { getAgentModel } from "./openrouter";
+import { getAgentModel } from "./provider";
 
 /**
  * Configuracion del agente POR CANAL.

@@ -87,7 +87,7 @@ export function DealForm({ open, onClose }: DealFormProps) {
 
       if (!res.ok) throw new Error("Error al crear deal");
 
-      toast.success("Deal creado exitosamente");
+      toast.success("Consulta creada correctamente");
       reset();
       onClose();
       router.refresh();
@@ -100,7 +100,7 @@ export function DealForm({ open, onClose }: DealFormProps) {
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Nuevo Deal</DialogTitle>
+          <DialogTitle>Nueva consulta</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -114,7 +114,7 @@ export function DealForm({ open, onClose }: DealFormProps) {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="deal-value">Valor (MXN)</Label>
+              <Label htmlFor="deal-value">Honorarios estimados (CLP)</Label>
               <Input
                 id="deal-value"
                 type="number"
@@ -124,7 +124,7 @@ export function DealForm({ open, onClose }: DealFormProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label>Probabilidad (%)</Label>
+              <Label>Probabilidad de contratación (%)</Label>
               <Input
                 type="number"
                 min="0"
@@ -176,7 +176,7 @@ export function DealForm({ open, onClose }: DealFormProps) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Cierre estimado</Label>
+              <Label>Fecha estimada de contratación</Label>
               <Input type="date" {...register("expectedClose")} />
             </div>
           </div>
@@ -191,7 +191,7 @@ export function DealForm({ open, onClose }: DealFormProps) {
               Cancelar
             </Button>
             <Button type="submit" disabled={isSubmitting} className="cursor-pointer">
-              {isSubmitting ? "Creando..." : "Crear Deal"}
+              {isSubmitting ? "Creando..." : "Crear consulta"}
             </Button>
           </div>
         </form>

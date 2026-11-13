@@ -113,7 +113,7 @@ export function PipelineEditor({
       if (res.status === 409) {
         const body = (await res.json()) as { dealCount?: number };
         toast.error(
-          `No se puede borrar: tiene ${body.dealCount ?? 0} deals. Movélos primero.`
+          `No se puede borrar: tiene ${body.dealCount ?? 0} consultas. Muévelas primero.`
         );
         return;
       }
@@ -165,7 +165,7 @@ export function PipelineEditor({
       if (res.status === 409) {
         const targetCandidate = stages.find((s) => s.id !== stage.id);
         if (!targetCandidate) {
-          toast.error("No hay otra etapa donde mover los deals");
+          toast.error("No hay otra etapa donde mover las consultas");
           return;
         }
         setMoveDialog({ stage, targetStageId: targetCandidate.id });
@@ -203,7 +203,7 @@ export function PipelineEditor({
 
       const res = await fetch(`/api/stages/${stage.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
-      toast.success(`Etapa borrada y ${toMove.length} deals movidos`);
+      toast.success(`Etapa borrada y ${toMove.length} consultas trasladadas`);
       setMoveDialog(null);
       router.refresh();
     } catch {
@@ -328,13 +328,13 @@ export function PipelineEditor({
       >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Mover deals antes de borrar</DialogTitle>
+            <DialogTitle>Mover consultas antes de borrar</DialogTitle>
           </DialogHeader>
           {moveDialog && (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
                 La etapa <span className="font-medium">{moveDialog.stage.name}</span>{" "}
-                tiene {dealsByStage[moveDialog.stage.id] ?? 0} deal(s). Elegí
+                tiene {dealsByStage[moveDialog.stage.id] ?? 0} consulta(s). Elige
                 a qué etapa moverlos:
               </p>
               <Select

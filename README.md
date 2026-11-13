@@ -21,7 +21,7 @@ pero no hace falta ser miembro de nada para que sea tuyo.
 - **Contactos** con ficha, documentos (bucket S3 opcional), campos personalizados por
   cliente y resumen del agente.
 - **Pipeline** kanban con etapas configurables que el agente puede mover.
-- **Agente de IA** (OpenRouter, modelo por variable): lee el historial, responde por
+- **Agente de IA** (OpenAI directo u OpenRouter, modelo por variable): lee el historial, responde por
   el canal, actualiza la ficha, mueve etapas, registra actividades, deja un resumen y
   deriva a una persona (pausa por conversacion).
 - **Reportes** reales por periodo y **dashboard** honesto.
@@ -46,7 +46,7 @@ pero no hace falta ser miembro de nada para que sea tuyo.
   el plan gratuito alcanza), o tu propio Postgres mas GoTrue en el VPS (ver
   [`docs/SUPABASE-EN-VPS.md`](docs/SUPABASE-EN-VPS.md)).
 - Para desplegar: un VPS con **Coolify** y un dominio.
-- Opcional: **OpenRouter** (agente), **Zernio** (canales), bucket S3 (documentos).
+- Opcional: **OpenAI** (agente), **Zernio** (canales), bucket S3 (documentos).
 - **Claude Code** con el repo abierto; ver [`CLAUDE.md`](CLAUDE.md) y
   [`docs/MCP.md`](docs/MCP.md).
 
@@ -58,23 +58,23 @@ npm install
 npm run local
 ```
 
-Y ya esta: `http://localhost:3000` con el CRM lleno de datos de demostracion. No hace
+Y ya esta: `http://localhost:3000` con el CRM vacio, listo para tus datos. No hace
 falta Supabase, ni Docker, ni un archivo `.env`.
 
 `npm run local` levanta un **Postgres embebido** (un paquete de npm compilado a
 WebAssembly, guardado en `.local/db`), aplica las mismas migraciones que una instancia
-desplegada —con su RLS—, carga los datos demo y abre el CRM. **No hay login**: en modo
+desplegada —con su RLS— y abre el CRM. **No hay login**: en modo
 local no hay servidor de autenticacion, asi que entras directo como administrador y el
 menu lateral te lo recuerda.
 
 | | |
 |---|---|
 | `npm run local -- --reset` | borra la base local y empieza de cero |
-| `npm run local -- --sin-datos` | sin datos de demostracion |
+| `npm run local -- --con-datos` | carga datos de demostracion en una base vacia |
 | `npm run local -- --puerto 3001` | otro puerto |
 
-Para que el **agente responda** en el simulador hace falta una clave de OpenRouter:
-copia `.env.example` a `.env.local` y pone `OPENROUTER_API_KEY`. Sin ella el CRM
+Para que el **agente responda** en el simulador hace falta una clave de OpenAI:
+copia `.env.example` a `.env.local` y pone `OPENAI_API_KEY`. Sin ella el CRM
 funciona igual (los mensajes entran a la bandeja y crean el contacto), solo que nadie
 contesta del otro lado.
 
@@ -93,7 +93,7 @@ npm run dev                       # http://localhost:3000
 1. Abre `/signup`: mientras no haya miembros, el registro esta abierto y **la primera
    cuenta queda como administrador**. Despues se cierra solo.
 2. En el inicio pulsa **Cargar demo** (o `npm run seed`) para ver el CRM lleno.
-3. Abre **Simulador** y chatea con el agente (necesita `OPENROUTER_API_KEY`).
+3. Abre **Simulador** y chatea con el agente (necesita `OPENAI_API_KEY`).
 4. Conecta WhatsApp/Instagram/Messenger cuando quieras: skill `conectar-zernio`.
 
 Sin interfaz: `npm run admin:crear -- --email a@b.com --password 'xxxxxxxx'`.
@@ -166,7 +166,7 @@ docs/              MCP, agente, Zernio, Supabase en tu VPS, entrar con Google, c
 
 | Comando | Que hace |
 |---|---|
-| `npm run local` | **probarlo en tu PC sin cuentas**: Postgres embebido, datos demo, sin login |
+| `npm run local` | **probarlo en tu PC sin cuentas**: Postgres embebido, sin login |
 | `npm run dev` / `build` / `start` | desarrollo contra tu Supabase, build, servidor |
 | `npm test` | invariantes del nucleo (vitest, sin base ni red, ~1 s) |
 | `npm run typecheck` / `lint` | gate tecnico (CI corre los tres + build) |

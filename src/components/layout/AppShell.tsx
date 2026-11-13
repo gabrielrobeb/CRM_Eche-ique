@@ -16,6 +16,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const m = marca();
 
+  if (pathname === "/testeo") return <>{children}</>;
+
   if (isAuthRoute) {
     return (
       <div className="min-h-screen flex">
@@ -47,7 +49,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <div className="relative space-y-6 max-w-md">
             <p className="text-3xl lg:text-[34px] font-heading font-semibold tracking-tight leading-[1.15] text-balance">
-              Tu pipeline de ventas, ordenado y conectado a WhatsApp.
+              Las consultas de tu estudio, organizadas en un solo lugar.
             </p>
             <p className="text-sm text-white/60 leading-relaxed">
               {m.descripcion}
@@ -89,7 +91,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen w-full">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-h-screen min-w-0">
+      <div className="flex-1 flex flex-col min-h-screen min-w-0 app-workspace">
         <Header />
         <main className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto max-w-[1480px] px-4 py-6 md:px-8 md:py-8 lg:px-10 lg:py-10 min-w-0">

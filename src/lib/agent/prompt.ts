@@ -3,6 +3,7 @@ import { contacts, crmSettings, deals, pipelineStages, pipelines } from "@/db/sc
 import { and, desc, eq } from "drizzle-orm";
 import { camposContacto, getConfig } from "@/lib/config";
 import { resumirCampos } from "@/lib/config/campos";
+import { getBookingUrl } from "./agenda";
 
 export const SYSTEM_PROMPT_SETTINGS_KEY = "agent.system_prompt";
 
@@ -94,7 +95,8 @@ export function renderSystemPrompt(template: string, opts: { now?: Date; channel
     .replaceAll("{{fecha}}", fecha)
     .replaceAll("{{canal}}", CHANNEL_NAMES[channel] ?? channel)
     .replaceAll("{{agente}}", agente.nombre)
-    .replaceAll("{{negocio}}", marca.nombre);
+    .replaceAll("{{negocio}}", marca.nombre)
+    .replaceAll("{{enlace_agenda}}", getBookingUrl() ?? "NO CONFIGURADO: no enviar ni inventar enlaces de agenda");
 
   const hint = CHANNEL_HINTS[channel];
   return hint ? `${rendered}\n\n# CANAL\n${hint}` : rendered;

@@ -98,7 +98,7 @@ export function ConversationActions({ conversationId, name, messageCount }: Prop
           </DialogHeader>
 
           <p className="text-sm text-muted-foreground">
-            El contacto, sus operaciones y sus documentos <strong>no</strong> se tocan. Si
+            El contacto, sus consultas y sus documentos <strong>no</strong> se tocan. Si
             vuelve a escribir, se abre un hilo nuevo.
           </p>
 

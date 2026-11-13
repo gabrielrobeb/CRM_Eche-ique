@@ -1,5 +1,6 @@
 import "server-only";
 import type { Conector, EstadoConector } from "../conector";
+import { hasAgentKey, agentKeyVariable } from "@/lib/agent/provider";
 
 /**
  * Conector del simulador: para probar el agente y hacer demos sin ningun canal
@@ -31,9 +32,9 @@ export const simulador: Conector = {
       cuentas: [],
       notas: [
         "Para demos y autoverificacion: las conversaciones simuladas no salen a ningun canal real.",
-        process.env.OPENROUTER_API_KEY
+        hasAgentKey()
           ? "Agente listo para responder."
-          : "Falta OPENROUTER_API_KEY: el simulador no puede hacer responder al agente.",
+          : `Falta ${agentKeyVariable()}: el simulador no puede hacer responder al agente.`,
       ],
     };
   },

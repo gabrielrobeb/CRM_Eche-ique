@@ -66,7 +66,7 @@ export function ContactsTable({ contacts, onChange }: ContactsTableProps) {
       <EmptyState
         icon={Users}
         title="No hay contactos"
-        description="Agrega tu primer contacto para comenzar a gestionar tu pipeline de ventas."
+        description="Agrega tu primer contacto para comenzar a organizar las consultas del estudio."
         actionLabel="Agregar contacto"
         onAction={() => router.push("/contacts?new=true")}
       />

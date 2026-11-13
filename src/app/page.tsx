@@ -9,7 +9,6 @@ import { PipelineChart } from "@/components/dashboard/PipelineChart";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { NotificationBanner } from "@/components/dashboard/NotificationBanner";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { CargarDemo } from "@/components/dashboard/CargarDemo";
 import type { DashboardStats } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -89,8 +88,8 @@ export default async function DashboardPage() {
   return (
     <div>
       <PageHeader
-        title="Dashboard"
-        subtitle="Resumen de tu pipeline de ventas"
+        title="Resumen del estudio"
+        subtitle="Consultas, seguimiento y contratación de servicios jurídicos"
       />
 
       <div className="space-y-5">
@@ -100,9 +99,9 @@ export default async function DashboardPage() {
             Todo listo para empezar
           </h2>
           <p className="text-sm text-muted-foreground mb-4">
-            Todavia no hay contactos. Tres caminos para arrancar:
+            Todavia no hay contactos. Puedes comenzar de estas formas:
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             <div className="p-3.5 rounded-xl bg-card border border-border/60">
               <p className="font-medium">1. Conecta un canal</p>
               <p className="text-xs text-muted-foreground mt-1">
@@ -114,13 +113,6 @@ export default async function DashboardPage() {
               <p className="text-xs text-muted-foreground mt-1">
                 Desde Contactos, a mano o importando un CSV
               </p>
-            </div>
-            <div className="p-3.5 rounded-xl bg-card border border-border/60">
-              <p className="font-medium">3. Carga datos de demostracion</p>
-              <p className="text-xs text-muted-foreground mt-1 mb-2">
-                Contactos, conversaciones y operaciones inventados para ver el CRM lleno.
-              </p>
-              {member.role === "admin" && <CargarDemo />}
             </div>
           </div>
         </div>

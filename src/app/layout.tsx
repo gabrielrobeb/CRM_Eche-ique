@@ -43,8 +43,9 @@ export default function RootLayout({
 }>) {
   const { idioma } = getConfig();
   return (
-    <html lang={idioma} className="h-full antialiased">
+    <html lang={idioma} className="dark h-full antialiased" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem('crm-tema')==='claro')document.documentElement.classList.remove('dark')}catch{}` }} />
         {/* Colores de la marca en SSR: sin flash del color por defecto. */}
         <style dangerouslySetInnerHTML={{ __html: cssVariablesMarca() }} />
         {/* Config publica en tiempo de ejecucion: ver src/lib/config-publica.ts. */}

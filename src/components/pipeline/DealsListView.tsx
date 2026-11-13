@@ -24,7 +24,7 @@ export function DealsListView({ deals, stages }: DealsListViewProps) {
   if (deals.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border/60 p-8 text-center text-sm text-muted-foreground">
-        No hay deals en este pipeline.
+        No hay consultas en este seguimiento.
       </div>
     );
   }

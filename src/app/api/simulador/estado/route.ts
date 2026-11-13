@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { pipelineStages, pipelines } from "@/db/schema";
 import { camposContacto, getConfig } from "@/lib/config";
 import { manifiestosActivos } from "@/lib/modules/cliente";
-import { hasOpenRouterKey, getAgentModel } from "@/lib/agent/openrouter";
+import { hasAgentKey, getAgentModel, getAgentProvider } from "@/lib/agent/provider";
 import { APP_VERSION } from "@/lib/version";
 import { autorizarSimulador } from "@/lib/simulador";
 
@@ -36,6 +36,6 @@ export async function GET(request: NextRequest) {
     etapas,
     campos: camposContacto().map((c) => ({ clave: c.clave, etiqueta: c.etiqueta, tipo: c.tipo })),
     modulos: manifiestosActivos().map((m) => m.nombre),
-    agente: { configurado: hasOpenRouterKey(), modelo: getAgentModel() },
+    agente: { configurado: hasAgentKey(), modelo: getAgentModel(), proveedor: getAgentProvider() },
   });
 }

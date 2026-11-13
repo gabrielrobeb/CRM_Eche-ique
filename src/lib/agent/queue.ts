@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { agentJobs, contacts, conversations } from "@/db/schema";
 import { and, eq, isNull, lte } from "drizzle-orm";
 
-const DEBOUNCE_MS = 6000;
+const DEBOUNCE_MS = 10_000;
 
 /**
  * Encola un job para procesar el agente IA.

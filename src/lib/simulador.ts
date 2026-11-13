@@ -11,7 +11,7 @@ import { emitContactCreated } from "@/lib/contacts/events";
 import { assignContact } from "@/lib/contacts/assign";
 import { getConversation } from "@/lib/conversations";
 import { runAgentForConversation } from "@/lib/agent";
-import { hasOpenRouterKey } from "@/lib/agent/openrouter";
+import { hasAgentKey, agentKeyVariable } from "@/lib/agent/provider";
 import type { Channel } from "@/lib/channels/types";
 import type { TeamMember } from "@/lib/team";
 
@@ -132,8 +132,8 @@ async function estadoContacto(contactId: string | null): Promise<EstadoContactoS
  * realidad el CRM habia hecho bien su parte.
  */
 async function turnoDelAgente(conversationId: string): Promise<ResultadoSimulacion["agente"]> {
-  if (!hasOpenRouterKey()) {
-    return { ok: false, reason: "falta OPENROUTER_API_KEY en .env.local" };
+  if (!hasAgentKey()) {
+    return { ok: false, reason: `falta ${agentKeyVariable()} en .env.local` };
   }
   try {
     return await runAgentForConversation(conversationId);

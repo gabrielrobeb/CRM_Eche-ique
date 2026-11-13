@@ -108,7 +108,7 @@ export const esquemaAgente = z.object({
   nombre: z.string().max(40).default("Asistente"),
   /** Prompt base. Si falta, se usa el default del nucleo (src/lib/agent/prompt.ts). */
   prompt: z.string().optional(),
-  /** Modelo de OpenRouter. AGENT_MODEL (entorno) manda sobre este valor. */
+  /** Modelo del proveedor del agente. AGENT_MODEL (entorno) manda sobre este valor. */
   modelo: z.string().optional(),
   /** Lo que se le dice al cliente cuando el agente deriva a una persona. */
   mensajeDerivacion: z
@@ -202,6 +202,12 @@ export const esquemaConfig = z.object({
   }),
   /** Datos de demostracion del nicho. Sin esto, la demo del nucleo es generica. */
   demo: esquemaDemo.optional(),
+  /** Textos de la prueba compartida; sin referencias a un rubro en el núcleo. */
+  testeo: z.object({
+    titulo: z.string().min(1).default("¿Cómo podemos ayudarte?"),
+    descripcion: z.string().min(1).default("Escribe una consulta para probar la atención del asistente."),
+    sugerencias: z.array(z.string().min(1).max(300)).max(4).default(["Hola, quisiera recibir más información."]),
+  }).prefault({}),
   /** Funciones del nucleo apagables + modulos de `modules/` por nombre de carpeta. */
   modulos: z
     .object({

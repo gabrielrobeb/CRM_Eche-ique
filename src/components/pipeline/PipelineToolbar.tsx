@@ -63,7 +63,7 @@ export function PipelineToolbar({
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Valor mín. (MXN)</Label>
+                  <Label className="text-xs">Honorarios mín. (CLP)</Label>
                   <Input
                     type="number"
                     value={
@@ -80,7 +80,7 @@ export function PipelineToolbar({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Valor máx. (MXN)</Label>
+                  <Label className="text-xs">Honorarios máx. (CLP)</Label>
                   <Input
                     type="number"
                     value={

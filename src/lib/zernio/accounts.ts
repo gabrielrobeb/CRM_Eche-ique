@@ -9,10 +9,34 @@ import type {
 
 /** Cuentas sociales conectadas y flujos de conexion (OAuth y headless). */
 
+type RawAccount = Omit<ZernioAccount, "profileId"> & {
+  _id?: string;
+  profileId?: string | { _id?: string; id?: string };
+};
+
 export async function listAccounts(): Promise<
   ZernioResult<ZernioListResponse<ZernioAccount>>
 > {
-  return zernioFetch<ZernioListResponse<ZernioAccount>>("/accounts");
+  const result = await zernioFetch<{
+    data?: RawAccount[];
+    accounts?: RawAccount[];
+    pagination?: ZernioListResponse<ZernioAccount>["pagination"];
+    meta?: ZernioListResponse<ZernioAccount>["meta"];
+  }>("/accounts");
+  if (!result.success) return result;
+  return {
+    success: true,
+    data: {
+      ...result.data,
+      data: (result.data.data ?? result.data.accounts ?? []).map((account) => ({
+        ...account,
+        id: account.id ?? account._id ?? "",
+        profileId: typeof account.profileId === "object"
+          ? account.profileId._id ?? account.profileId.id
+          : account.profileId,
+      })),
+    },
+  };
 }
 
 export async function getAccount(

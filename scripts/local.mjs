@@ -5,7 +5,7 @@
 //
 //   npm run local                 arranca (la primera vez prepara todo)
 //   npm run local -- --reset      borra la base local y empieza de cero
-//   npm run local -- --sin-datos  sin datos de demostracion
+//   npm run local -- --con-datos  carga datos de demostracion en una base vacia
 //   npm run local -- --puerto 3001
 //
 // Que hace, en orden:
@@ -19,7 +19,7 @@
 //   3. Aplica LAS MISMAS migraciones que una instancia desplegada, con su RLS.
 //   4. Da de alta el administrador de la demo insertandolo en auth.users, para que lo
 //      cree el mismo disparador del primer admin que corre en produccion.
-//   5. Arranca `next dev` con MODO_LOCAL=true y carga los datos demo.
+//   5. Arranca `next dev` con MODO_LOCAL=true; los datos demo son opcionales.
 //
 // Lo que NO es: no hay servidor de autenticacion, asi que no hay login ni equipo ni
 // invitaciones por correo. Quien abre la URL entra como administrador. Para probar eso
@@ -38,7 +38,7 @@ const requerir = createRequire(import.meta.url);
 
 const args = process.argv.slice(2);
 const reset = args.includes("--reset");
-const sinDatos = args.includes("--sin-datos");
+const conDatos = args.includes("--con-datos") && !args.includes("--sin-datos");
 const iPuerto = args.indexOf("--puerto");
 const puerto = iPuerto >= 0 ? Number(args[iPuerto + 1]) : 3000;
 
@@ -187,7 +187,7 @@ try {
   }
 
   const contactos = await db.query("select count(*)::int n from public.contacts");
-  sembrar = !sinDatos && contactos.rows[0].n === 0;
+  sembrar = conDatos && contactos.rows[0].n === 0;
 } catch (err) {
   console.error("[local] fallo preparando la base:", err instanceof Error ? err.message : err);
   console.error("[local] si quedo a medias: npm run local -- --reset");
@@ -256,8 +256,10 @@ if (await esperarServidor()) {
   console.log("");
   paso(`listo: ${base}`);
   paso("entras directo, sin login: en modo local no hay sesion.");
-  if (!process.env.OPENROUTER_API_KEY) {
-    paso("el agente de IA esta apagado (falta OPENROUTER_API_KEY en .env.local).");
+  const proveedor = process.env.AGENT_PROVIDER || (process.env.OPENAI_API_KEY ? "openai" : "openrouter");
+  const claveAgente = proveedor === "openai" ? "OPENAI_API_KEY" : "OPENROUTER_API_KEY";
+  if (!process.env[claveAgente]?.trim()) {
+    paso(`el agente de IA esta apagado (falta ${claveAgente} en .env.local).`);
   }
   console.log("");
 }
