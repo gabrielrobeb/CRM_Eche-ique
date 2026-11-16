@@ -10,7 +10,7 @@ import { getAgentConfig } from "./config";
 import { renderContexto, renderSystemPrompt } from "./prompt";
 import { executeTool, getEnabledToolDefinitions, type ToolContext } from "./tools";
 import { getAgentClient, getAgentModel, hasAgentKey, opcionesRazonamiento } from "./provider";
-import { formatearRespuesta, mensajeDeDerivacion } from "./respuesta";
+import { evitarAceptacionRepetida, formatearRespuesta, mensajeDeDerivacion, yaPreguntoAceptacion } from "./respuesta";
 import { registrarDatosConfirmados } from "./registro";
 
 const MAX_TOOL_ROUNDS = 6;
@@ -84,6 +84,7 @@ export async function runAgentForConversation(conversationId: string): Promise<R
       content: renderSystemPrompt(config.systemPrompt, { channel: conversation.provider === "simulador" ? "simulador" : channel }) + contexto + equipo,
     },
     ...collapsed,
+    ...(yaPreguntoAceptacion(collapsed) ? [{ role: "system" as const, content: "Ya preguntaste si acepta el valor de la consulta. Responde a su última duda SIN volver a preguntar aceptación del precio ni cerrar otra vez con agenda. Que no haya contestado todavía no autoriza insistir." }] : []),
     ...(registro && !registro.ok ? [{ role: "system" as const, content: "El registro previo no se completo. Guarda los datos confirmados con actualizar_contacto antes de responder; no afirmes haberlos guardado hasta que la herramienta confirme exito." }] : []),
   ];
   let toolCalls = registro?.guardado ? 1 : 0;
@@ -141,7 +142,7 @@ export async function runAgentForConversation(conversationId: string): Promise<R
       continue;
     }
 
-    const reply = formatearRespuesta(assistantMsg.content?.trim() ?? "", channel);
+    const reply = formatearRespuesta(evitarAceptacionRepetida(assistantMsg.content?.trim() ?? "", collapsed), channel);
     if (!reply) return { ok: false, reason: "empty_reply", toolCalls };
 
     const entrega = await deliverMessage(conversation.id, { text: reply }, "agent");

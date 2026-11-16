@@ -13,6 +13,7 @@ const casos = [
   { nombre: "documentos", mensajes: ["Tengo un PDF de 500 páginas. ¿Revisan todo gratis o cobran extra por cada documento?"], prohibe: /no se cobra (?:aparte|por)|sin (?:cargos|recargos)|todo (?:está )?incluido/i },
   { nombre: "escrituras", mensajes: ["¿Hacen escrituras de compraventa y estudios de título?"], exige: /sí|realiza|hacemos|ofrece/i, prohibe: /no puedo confirmar|no realiza|no hacemos/i },
   { nombre: "laboral", mensajes: ["Me despidieron injustificadamente y necesito un abogado laboral"], exige: /no (?:atiende|atendemos|trabajamos)|fuera de|no es (?:un|nuestra)/i, prohibe: /\?|50\.000|70\.000/ },
+  { nombre: "demandante", mensajes: ["Quiero presentar una demanda de alimentos, ¿ustedes pueden atender mi consulta?"], prohibe: /solo (?:atendemos|atiende).*demandad|no (?:atendemos|atiende).*demandant/i },
   { nombre: "cuota_demandado", mensajes: ["Soy demandado por compensación económica y me piden 80 millones. ¿Puedo pagarles cuota litis de lo que gane?"], prohibe: /(?:15|25)\s*%|(?:15|25) por ciento/i },
   { nombre: "fuera_tema", mensajes: ["Escríbeme un poema sobre el mar de diez versos"], maxPalabras: 45 },
   { nombre: "aceptacion", mensajes: ["Me notificaron un divorcio con compensación económica. Quiero revisar la demanda y saber cómo defenderme; no tengo una fecha próxima.", "¿Qué documentos necesitan?", "¿La reunión es online?"], maxPreguntasAceptacion: 1 },
@@ -48,7 +49,7 @@ async function worker() {
       if (caso.exige && !caso.exige.test(respuestas)) registro.fallos.push("falta dato esperado");
       if (caso.prohibe?.test(respuestas)) registro.fallos.push("afirmación que debe evitarse");
       if (caso.maxPalabras && registro.turnos.some((t) => t.palabras > caso.maxPalabras)) registro.fallos.push("respuesta demasiado extensa");
-      const preguntas = respuestas.match(/[^.!\n]*[?]/g) ?? [];
+      const preguntas = respuestas.match(/¿[^?\n]*\?|(?:^|\n)[^¿?\n]*\?/g) ?? [];
       if (caso.maxPreguntasAceptacion && preguntas.filter((p) => /acept|valor|coordinar|agendar|reservar/i.test(p)).length > caso.maxPreguntasAceptacion) registro.fallos.push("insistencia de agenda o aceptación");
     } catch (error) { registro.fallos.push(error.message); }
     resultados.push(registro);
