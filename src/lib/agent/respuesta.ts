@@ -27,6 +27,7 @@ export function yaPreguntoAceptacion(historial: Turno[]): boolean {
 
 /** Quitar solo el cierre repetido; conservar la respuesta a la duda y los precios. */
 export function evitarAceptacionRepetida(texto: string, historial: Turno[]): string {
+  if (!texto.trim()) return texto;
   if (!yaPreguntoAceptacion(historial)) return texto;
   return texto.replace(preguntas, (pregunta) => esAceptacion(pregunta) ? "" : pregunta).trim()
     || "Puedo aclarar tus dudas sobre lo que te comenté.";

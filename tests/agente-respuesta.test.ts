@@ -38,6 +38,7 @@ it("detecta preguntas de aceptación con montos que contienen puntos", () => {
 
 it("no elimina una pregunta sobre notificaciones ni entrega un mensaje vacío", () => {
   const historial = [{ role: "assistant", content: "¿Aceptas ese valor?" }];
+  expect(evitarAceptacionRepetida("", historial)).toBe("");
   expect(evitarAceptacionRepetida("¿Aceptaste recibir notificaciones?", historial)).toBe("¿Aceptaste recibir notificaciones?");
   expect(evitarAceptacionRepetida("¿Aceptas el precio de $50.000?", historial)).toBe("Puedo aclarar tus dudas sobre lo que te comenté.");
 });
