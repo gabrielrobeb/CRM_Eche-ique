@@ -44,9 +44,9 @@ export default definirConfig({
     campos: [
       {
         clave: "area_juridica", etiqueta: "Área jurídica", tipo: "seleccion",
-        opciones: ["Familia", "Civil", "Penal", "Propiedad", "Otra", "Por definir"],
+        opciones: ["Familia", "Civil", "Penal", "Otra", "Por definir"],
         enTabla: true,
-        agente: { descripcion: "área jurídica general de la consulta, sin pedir detalles sensibles" },
+        agente: { descripcion: "Familia, Civil o Penal según la consulta; escrituras, propiedad y estudios de título se clasifican Civil. Otra solo para materias fuera de estas áreas. No pedir detalles sensibles" },
       },
       {
         clave: "situacion_consulta", etiqueta: "Situación de la consulta", tipo: "seleccion",
@@ -96,6 +96,7 @@ export default definirConfig({
   },
   agente: {
     nombre: "Asistente de Echenique Abogados",
+    agenda: { campoArea: "area_juridica", tarifas: { Familia: 50000, Civil: 50000, Penal: 70000 } },
     mensajesDerivacion: {
       riesgo_personal: "Lo que cuentas puede poner en riesgo tu seguridad. Si hay peligro inmediato, llama al 133 de Carabineros; para orientación por violencia intrafamiliar, al Fono Familia 149. No esperes la respuesta del estudio ante una emergencia. Dejé tu solicitud con prioridad para el equipo, sin prometer atención inmediata ni representación.",
       plazo_proximo: "La fecha que indicas requiere atención urgente. Dejé tu solicitud marcada como urgente para que el equipo la revise con prioridad. Esto no confirma que podamos representarte ni suspende la audiencia o los plazos; no esperes una confirmación del estudio para buscar asistencia jurídica oportuna.",

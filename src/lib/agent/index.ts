@@ -10,7 +10,8 @@ import { getAgentConfig } from "./config";
 import { renderContexto, renderSystemPrompt } from "./prompt";
 import { executeTool, getEnabledToolDefinitions, type ToolContext } from "./tools";
 import { getAgentClient, getAgentModel, hasAgentKey, opcionesRazonamiento } from "./provider";
-import { evitarAceptacionRepetida, formatearRespuesta, mensajeDeDerivacion, yaPreguntoAceptacion } from "./respuesta";
+import { evitarAceptacionRepetida, formatearRespuesta, mensajeDeDerivacion, respuestaParaAgendar, solicitaAgendar, yaPreguntoAceptacion } from "./respuesta";
+import { getBookingUrl } from "./agenda";
 import { registrarDatosConfirmados } from "./registro";
 
 const MAX_TOOL_ROUNDS = 6;
@@ -84,7 +85,7 @@ export async function runAgentForConversation(conversationId: string): Promise<R
       content: renderSystemPrompt(config.systemPrompt, { channel: conversation.provider === "simulador" ? "simulador" : channel }) + contexto + equipo,
     },
     ...collapsed,
-    ...(yaPreguntoAceptacion(collapsed) ? [{ role: "system" as const, content: "Ya preguntaste si acepta el valor de la consulta. Responde a su última duda SIN volver a preguntar aceptación del precio ni cerrar otra vez con agenda. Que no haya contestado todavía no autoriza insistir." }] : []),
+    ...(yaPreguntoAceptacion(collapsed) ? [{ role: "system" as const, content: "Ya invitaste a avanzar y agendar. Responde a su última duda SIN repetir la invitación ni pedir aprobación del precio. Si ahora quiere agendar, entrega el enlace sin más barreras. Si todavía no decide, no insistas." }] : []),
     ...(registro && !registro.ok ? [{ role: "system" as const, content: "El registro previo no se completo. Guarda los datos confirmados con actualizar_contacto antes de responder; no afirmes haberlos guardado hasta que la herramienta confirme exito." }] : []),
   ];
   let toolCalls = registro?.guardado ? 1 : 0;
@@ -142,8 +143,19 @@ export async function runAgentForConversation(conversationId: string): Promise<R
       continue;
     }
 
-    const reply = formatearRespuesta(evitarAceptacionRepetida(assistantMsg.content?.trim() ?? "", collapsed), channel);
+    let reply = formatearRespuesta(evitarAceptacionRepetida(assistantMsg.content?.trim() ?? "", collapsed), channel);
     if (!reply) return { ok: false, reason: "empty_reply", toolCalls };
+
+    const agenda = getConfig().agente.agenda;
+    const ultimoMensaje = collapsed.at(-1)?.content ?? "";
+    if (agenda && solicitaAgendar(ultimoMensaje, collapsed.slice(0, -1)) && !/no podemos ayudarte/i.test(reply)) {
+      const [actual] = await db.select({ campos: contacts.customFields }).from(contacts).where(eq(contacts.id, contact.id)).limit(1);
+      const campos = actual?.campos as Record<string, unknown> | null;
+      // Las urgencias conservan el flujo de atención prioritaria, no se cierran con agenda.
+      if (campos?.urgencia !== "Urgente") {
+        reply = respuestaParaAgendar({ mensaje: ultimoMensaje, area: campos?.[agenda.campoArea], tarifas: agenda.tarifas, enlace: getBookingUrl(), historial: collapsed }) ?? reply;
+      }
+    }
 
     const entrega = await deliverMessage(conversation.id, { text: reply }, "agent");
     if (!entrega.ok) {

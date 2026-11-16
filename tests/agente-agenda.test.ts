@@ -22,3 +22,9 @@ it("indica que falta configurar la agenda si no hay enlace", () => {
   expect(getBookingUrl()).toBeNull();
   expect(renderSystemPrompt("{{enlace_agenda}}", { channel: "simulador" })).toContain("NO CONFIGURADO");
 });
+
+it("conserva la sección de agenda autorizada para las pruebas", () => {
+  vi.stubEnv("AGENDA_URL", "https://echeniqueabogados.site/#agenda");
+  expect(getBookingUrl()).toBe("https://echeniqueabogados.site/#agenda");
+  expect(renderSystemPrompt("Agenda: {{enlace_agenda}}", { channel: "simulador" })).toBe("Agenda: https://echeniqueabogados.site/#agenda");
+});
