@@ -60,3 +60,6 @@ Thumbs.db
 
 # Briefings originales del cliente (datos privados; no publicar en GitHub)
 /Astrid/
+
+# Pruebas de conversaciones: conservar localmente, fuera del repositorio
+/Feedback/*.csv

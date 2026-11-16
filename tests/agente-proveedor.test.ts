@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { agentKeyVariable, getAgentClient, getAgentModel, getAgentProvider, hasAgentKey } from "@/lib/agent/provider";
+import { agentKeyVariable, getAgentClient, getAgentModel, getAgentProvider, hasAgentKey, opcionesRazonamiento } from "@/lib/agent/provider";
 
 vi.mock("@/lib/config", () => ({
   getConfig: () => ({ agente: {} }),
@@ -55,4 +55,12 @@ it("conserva OpenRouter y permite elegir el modelo", () => {
 it("rechaza un proveedor desconocido", () => {
   entorno(); vi.stubEnv("AGENT_PROVIDER", "otro");
   expect(() => getAgentProvider()).toThrow("AGENT_PROVIDER");
+});
+
+it("apaga razonamiento en DeepSeek por OpenRouter sin alterar otros modelos", () => {
+  entorno(); vi.stubEnv("AGENT_PROVIDER", "openrouter");
+  expect(opcionesRazonamiento("deepseek/deepseek-v4.1-flash-1017")).toEqual({ reasoning: { enabled: false } });
+  expect(opcionesRazonamiento("otro-modelo")).toEqual({});
+  vi.stubEnv("AGENT_PROVIDER", "openai");
+  expect(opcionesRazonamiento("deepseek/deepseek-v4.1-flash-1017")).toEqual({});
 });

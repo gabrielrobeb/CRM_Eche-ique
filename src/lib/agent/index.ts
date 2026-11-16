@@ -9,7 +9,8 @@ import { getConfig } from "@/lib/config";
 import { getAgentConfig } from "./config";
 import { renderContexto, renderSystemPrompt } from "./prompt";
 import { executeTool, getEnabledToolDefinitions, type ToolContext } from "./tools";
-import { getAgentClient, getAgentModel, hasAgentKey } from "./provider";
+import { getAgentClient, getAgentModel, hasAgentKey, opcionesRazonamiento } from "./provider";
+import { formatearRespuesta, mensajeDeDerivacion } from "./respuesta";
 import { registrarDatosConfirmados } from "./registro";
 
 const MAX_TOOL_ROUNDS = 6;
@@ -90,6 +91,7 @@ export async function runAgentForConversation(conversationId: string): Promise<R
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
     const completion = await client.chat.completions.create({
       model: config.model,
+      ...opcionesRazonamiento(config.model),
       messages: llmMessages,
       tools: tools.length > 0 ? tools : undefined,
       tool_choice: tools.length > 0 ? "auto" : undefined,
@@ -102,6 +104,7 @@ export async function runAgentForConversation(conversationId: string): Promise<R
     if (choice.finish_reason === "tool_calls" && assistantMsg.tool_calls?.length) {
       llmMessages.push(assistantMsg);
       let detenido = false;
+      let tipoDerivacion: unknown;
 
       for (const tc of assistantMsg.tool_calls) {
         if (tc.type !== "function") continue;
@@ -115,13 +118,18 @@ export async function runAgentForConversation(conversationId: string): Promise<R
         }
 
         const result = await executeTool(tc.function.name, args, ctx);
-        if (result.ok && result.stop) detenido = true;
+        if (result.ok && result.stop) {
+          detenido = true;
+          const tipo = (result.data as { tipoDerivacion?: unknown } | undefined)?.tipoDerivacion;
+          // Nunca degradar un aviso de riesgo por otra herramienta del mismo turno.
+          if (tipoDerivacion !== "riesgo_personal") tipoDerivacion = tipo;
+        }
 
         llmMessages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(result) });
       }
 
       if (detenido) {
-        const mensaje = getConfig().agente.mensajeDerivacion;
+        const mensaje = formatearRespuesta(mensajeDeDerivacion(getConfig().agente, tipoDerivacion), channel);
         const entrega = await deliverMessage(conversation.id, { text: mensaje }, "agent");
         return {
           ok: entrega.ok,
@@ -133,7 +141,7 @@ export async function runAgentForConversation(conversationId: string): Promise<R
       continue;
     }
 
-    const reply = assistantMsg.content?.trim() ?? "";
+    const reply = formatearRespuesta(assistantMsg.content?.trim() ?? "", channel);
     if (!reply) return { ok: false, reason: "empty_reply", toolCalls };
 
     const entrega = await deliverMessage(conversation.id, { text: reply }, "agent");

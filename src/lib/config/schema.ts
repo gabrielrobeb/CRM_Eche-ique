@@ -110,6 +110,11 @@ export const esquemaAgente = z.object({
   prompt: z.string().optional(),
   /** Modelo del proveedor del agente. AGENT_MODEL (entorno) manda sobre este valor. */
   modelo: z.string().optional(),
+  mensajesDerivacion: z.object({
+    riesgo_personal: z.string().min(1).max(700).optional(),
+    plazo_proximo: z.string().min(1).max(700).optional(),
+  }).optional(),
+  camposDerivacionUrgente: z.record(z.string(), z.string()).optional(),
   /** Lo que se le dice al cliente cuando el agente deriva a una persona. */
   mensajeDerivacion: z
     .string()

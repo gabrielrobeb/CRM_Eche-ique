@@ -96,6 +96,11 @@ export default definirConfig({
   },
   agente: {
     nombre: "Asistente de Echenique Abogados",
+    mensajesDerivacion: {
+      riesgo_personal: "Lo que cuentas puede poner en riesgo tu seguridad. Si hay peligro inmediato, llama al 133 de Carabineros; para orientación por violencia intrafamiliar, al Fono Familia 149. No esperes la respuesta del estudio ante una emergencia. Dejé tu solicitud con prioridad para el equipo, sin prometer atención inmediata ni representación.",
+      plazo_proximo: "La fecha que indicas requiere atención urgente. Dejé tu solicitud marcada como urgente para que el equipo la revise con prioridad. Esto no confirma que podamos representarte ni suspende la audiencia o los plazos; no esperes una confirmación del estudio para buscar asistencia jurídica oportuna.",
+    },
+    camposDerivacionUrgente: { urgencia: "Urgente" },
     mensajeDerivacion: "Dejé tu solicitud y el resumen para el equipo. Continuarán contigo para coordinar los próximos pasos; todavía no hay una hora reservada.",
     prompt: promptEchenique,
   },

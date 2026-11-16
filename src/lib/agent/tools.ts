@@ -231,7 +231,13 @@ async function resumenLead(
   return { ok: true, data: { guardado: true } };
 }
 
-async function derivarAsesor(args: { motivo?: string }, ctx: ToolContext): Promise<ToolResult> {
+async function derivarAsesor(args: { motivo?: string; tipo?: string }, ctx: ToolContext): Promise<ToolResult> {
+  const tipo = args.tipo === "riesgo_personal" || args.tipo === "plazo_proximo" ? args.tipo : "general";
+  const campos = getConfig().agente.camposDerivacionUrgente;
+  if (tipo !== "general" && campos && Object.keys(campos).length) {
+    const actualizado = await actualizarContacto({ campos }, ctx);
+    if (!actualizado.ok) return actualizado;
+  }
   const motivo = String(args.motivo ?? "derivado por el agente").slice(0, 300);
   const now = new Date();
 
@@ -259,7 +265,7 @@ async function derivarAsesor(args: { motivo?: string }, ctx: ToolContext): Promi
   return {
     ok: true,
     stop: true,
-    data: { derivado: true, motivo, message: "Agente pausado en esta conversacion. Una persona del equipo sigue." },
+    data: { tipoDerivacion: tipo, derivado: true, motivo, message: "Agente pausado en esta conversacion. Una persona del equipo sigue." },
   };
 }
 
@@ -407,13 +413,16 @@ function toolsGenericas(): ToolAgente[] {
           "Usar cuando la consulta excede lo que sabes, una herramienta falla, o el cliente pide hablar con alguien.",
         {
           type: "object",
-          properties: { motivo: { type: "string", description: "Razon corta de la derivacion." } },
+          properties: {
+            motivo: { type: "string", description: "Razon corta, sin detalles sensibles." },
+            tipo: { type: "string", enum: ["general", "riesgo_personal", "plazo_proximo"], description: "riesgo_personal ante amenaza, violencia o peligro; plazo_proximo ante audiencia mañana o fecha inminente; general en los demás casos. Determina el aviso que recibe la persona." },
+          },
           required: ["motivo"],
           additionalProperties: false,
         }
       ),
       descripcionUI: "Permite al agente derivar a un humano (pausa el agente solo en esa conversacion). Recomendado dejar activa.",
-      ejecutar: (a, ctx) => derivarAsesor(a as { motivo?: string }, ctx),
+      ejecutar: (a, ctx) => derivarAsesor(a as { motivo?: string; tipo?: string }, ctx),
     },
     {
       definicion: definir(

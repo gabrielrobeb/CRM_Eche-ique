@@ -3,6 +3,12 @@ import { getConfig, marca } from "@/lib/config";
 
 export type AgentProvider = "openai" | "openrouter";
 
+/** Ajuste explícito solo para el modelo verificado; no forzarlo en modelos obligatorios. */
+export function opcionesRazonamiento(model: string) {
+  return getAgentProvider() === "openrouter" && model === "deepseek/deepseek-v4.1-flash-1017"
+    ? { reasoning: { enabled: false } } : {};
+}
+
 export function getAgentProvider(): AgentProvider {
   const explicit = process.env.AGENT_PROVIDER?.trim();
   if (explicit && explicit !== "openai" && explicit !== "openrouter") {
