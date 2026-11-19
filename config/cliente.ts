@@ -19,11 +19,11 @@ export default definirConfig({
   roles: { etiquetaAsesor: "Asesor jurídico" },
   testeo: {
     titulo: "Cuéntanos qué necesitas resolver",
-    descripcion: "Prueba la atención inicial de Echenique Abogados con una consulta ficticia, por ejemplo sobre derecho de familia. Evita compartir documentos o datos sensibles de personas reales. El asistente organiza la consulta; la evaluación jurídica corresponde al abogado.",
+    descripcion: "Prueba el asistente con un caso ficticio de familia, civil o penal. Elige una sugerencia o escribe tu consulta, sin compartir datos personales reales. Esta es una prueba de atención inicial; la evaluación del caso corresponde a la abogada.",
     sugerencias: [
       "Hola, quisiera orientación sobre un divorcio.",
-      "¿Cómo funciona la reunión de diagnóstico?",
-      "¿Cuánto cuesta la consulta inicial?",
+      "Hola, necesito ayuda con un contrato de arriendo.",
+      "Hola, necesito asesoría para defenderme de una denuncia penal.",
     ],
   },
   pipeline: {
@@ -96,7 +96,11 @@ export default definirConfig({
   },
   agente: {
     nombre: "Asistente de Echenique Abogados",
-    agenda: { campoArea: "area_juridica", tarifas: { Familia: 50000, Civil: 50000, Penal: 70000 } },
+    agenda: {
+      campoArea: "area_juridica", tarifas: { Familia: 50000, Civil: 50000, Penal: 70000 },
+      asistenciaEquipo: true,
+      seguimiento: { minutos: 30, mensaje: "¿Pudiste agendar tu consulta?", campoEstado: "estado_cita", estadosFinales: ["Agendada", "Realizada", "Cancelada"] },
+    },
     mensajesDerivacion: {
       riesgo_personal: "Lo que cuentas puede poner en riesgo tu seguridad. Si hay peligro inmediato, llama al 133 de Carabineros; para orientación por violencia intrafamiliar, al Fono Familia 149. No esperes la respuesta del estudio ante una emergencia. Dejé tu solicitud con prioridad para el equipo, sin prometer atención inmediata ni representación.",
       plazo_proximo: "La fecha que indicas requiere atención urgente. Dejé tu solicitud marcada como urgente para que el equipo la revise con prioridad. Esto no confirma que podamos representarte ni suspende la audiencia o los plazos; no esperes una confirmación del estudio para buscar asistencia jurídica oportuna.",

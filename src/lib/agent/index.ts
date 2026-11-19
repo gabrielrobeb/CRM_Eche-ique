@@ -13,6 +13,8 @@ import { getAgentClient, getAgentModel, hasAgentKey, opcionesRazonamiento } from
 import { evitarAceptacionRepetida, formatearRespuesta, mensajeDeDerivacion, respuestaParaAgendar, solicitaAgendar, yaPreguntoAceptacion } from "./respuesta";
 import { getBookingUrl } from "./agenda";
 import { registrarDatosConfirmados } from "./registro";
+import { asistenciaAgenda, REGLAS_ASISTENCIA_AGENDA, respuestaCuotasConsulta } from "./asistencia-agenda";
+import { programarSeguimientoAgenda } from "./seguimiento-agenda";
 
 const MAX_TOOL_ROUNDS = 6;
 const HISTORY_LIMIT = 30;
@@ -51,6 +53,7 @@ export async function runAgentForConversation(conversationId: string): Promise<R
 
   const config = await getAgentConfig(channel);
   if (!config.enabled) return { ok: false, reason: `agent_disabled_for_${channel}` };
+  const instrucciones = config.systemPrompt + (getConfig().agente.agenda?.asistenciaEquipo ? `\n\n${REGLAS_ASISTENCIA_AGENDA}` : "");
 
   const collapsed = await loadHistory(conversationId);
   if (collapsed === "empty") return { ok: false, reason: "no_history" };
@@ -66,7 +69,7 @@ export async function runAgentForConversation(conversationId: string): Promise<R
   const toolRegistro = tools.find((t) => t.type === "function" && t.function.name === "actualizar_contacto");
   const registro = toolRegistro?.type === "function" ? await registrarDatosConfirmados({
     client, model: config.model, tool: toolRegistro, historial: collapsed,
-    contexto: await renderContexto(contact.id), instrucciones: config.systemPrompt,
+    contexto: await renderContexto(contact.id), instrucciones,
     guardar: (args) => executeTool("actualizar_contacto", args, ctx),
     guardarResumen: config.enabledTools.includes("resumen_lead")
       ? (resumen) => executeTool("resumen_lead", { resumen }, ctx) : undefined,
@@ -82,13 +85,29 @@ export async function runAgentForConversation(conversationId: string): Promise<R
   const llmMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     {
       role: "system",
-      content: renderSystemPrompt(config.systemPrompt, { channel: conversation.provider === "simulador" ? "simulador" : channel }) + contexto + equipo,
+      content: renderSystemPrompt(instrucciones, { channel: conversation.provider === "simulador" ? "simulador" : channel }) + contexto + equipo,
     },
     ...collapsed,
     ...(yaPreguntoAceptacion(collapsed) ? [{ role: "system" as const, content: "Ya invitaste a avanzar y agendar. Responde a su última duda SIN repetir la invitación ni pedir aprobación del precio. Si ahora quiere agendar, entrega el enlace sin más barreras. Si todavía no decide, no insistas." }] : []),
     ...(registro && !registro.ok ? [{ role: "system" as const, content: "El registro previo no se completo. Guarda los datos confirmados con actualizar_contacto antes de responder; no afirmes haberlos guardado hasta que la herramienta confirme exito." }] : []),
   ];
   let toolCalls = registro?.guardado ? 1 : 0;
+
+  // Las dificultades de horario o reserva pasan directamente al equipo.
+  const asistencia = getConfig().agente.agenda?.asistenciaEquipo
+    ? asistenciaAgenda(collapsed.at(-1)?.content ?? "") : null;
+  if (asistencia) {
+    if (!config.enabledTools.includes("derivar_asesor")) {
+      return { ok: false, reason: "handoff_tool_disabled", toolCalls };
+    }
+    const result = await executeTool("derivar_asesor", { motivo: asistencia.motivo, tipo: "general" }, ctx);
+    toolCalls++;
+    if (!result.ok) return { ok: false, reason: result.error ?? "handoff_failed", toolCalls };
+    const reply = asistencia.respuesta;
+    const entrega = await deliverMessage(conversation.id, { text: reply }, "agent");
+    return { ok: entrega.ok, reply, toolCalls,
+      reason: entrega.ok ? "handoff" : `send_failed: ${entrega.error ?? "unknown"}` };
+  }
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
     const completion = await client.chat.completions.create({
@@ -143,12 +162,14 @@ export async function runAgentForConversation(conversationId: string): Promise<R
       continue;
     }
 
-    let reply = formatearRespuesta(evitarAceptacionRepetida(assistantMsg.content?.trim() ?? "", collapsed), channel);
+    const cuotas = getConfig().agente.agenda?.asistenciaEquipo
+      ? respuestaCuotasConsulta(collapsed.at(-1)?.content ?? "") : null;
+    let reply = cuotas ?? formatearRespuesta(evitarAceptacionRepetida(assistantMsg.content?.trim() ?? "", collapsed), channel);
     if (!reply) return { ok: false, reason: "empty_reply", toolCalls };
 
     const agenda = getConfig().agente.agenda;
     const ultimoMensaje = collapsed.at(-1)?.content ?? "";
-    if (agenda && solicitaAgendar(ultimoMensaje, collapsed.slice(0, -1)) && !/no podemos ayudarte/i.test(reply)) {
+    if (!cuotas && agenda && solicitaAgendar(ultimoMensaje, collapsed.slice(0, -1)) && !/no podemos ayudarte/i.test(reply)) {
       const [actual] = await db.select({ campos: contacts.customFields }).from(contacts).where(eq(contacts.id, contact.id)).limit(1);
       const campos = actual?.campos as Record<string, unknown> | null;
       // Las urgencias conservan el flujo de atención prioritaria, no se cierran con agenda.
@@ -160,6 +181,14 @@ export async function runAgentForConversation(conversationId: string): Promise<R
     const entrega = await deliverMessage(conversation.id, { text: reply }, "agent");
     if (!entrega.ok) {
       return { ok: false, reason: `send_failed: ${entrega.error ?? "unknown"}`, toolCalls };
+    }
+
+    if (getConfig().agente.agenda?.seguimiento && entrega.messageId) {
+      try {
+        await programarSeguimientoAgenda(conversation.id, entrega.messageId, reply);
+      } catch (error) {
+        console.error("[agente] no se pudo programar el seguimiento de agenda", error);
+      }
     }
 
     await db.update(contacts).set({ updatedAt: new Date() }).where(eq(contacts.id, contact.id));

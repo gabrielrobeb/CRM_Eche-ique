@@ -113,6 +113,13 @@ export const esquemaAgente = z.object({
   agenda: z.object({
     campoArea: z.string().min(1),
     tarifas: z.record(z.string(), z.number().positive()),
+    asistenciaEquipo: z.boolean().default(false),
+    seguimiento: z.object({
+      minutos: z.number().int().min(1).max(1440),
+      mensaje: z.string().min(1).max(500),
+      campoEstado: z.string().min(1),
+      estadosFinales: z.array(z.string().min(1)).min(1),
+    }).optional(),
   }).optional(),
   mensajesDerivacion: z.object({
     riesgo_personal: z.string().min(1).max(700).optional(),

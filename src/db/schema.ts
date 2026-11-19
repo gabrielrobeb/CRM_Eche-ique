@@ -198,6 +198,16 @@ export const messages = pgTable("messages", {
     .defaultNow(),
 });
 
+/** Un seguimiento de agenda por hilo; sobrevive reinicios y no se rearma al reenviar el enlace. */
+export const bookingFollowups = pgTable("booking_followups", {
+  conversationId: text("conversation_id").primaryKey().references(() => conversations.id, { onDelete: "cascade" }),
+  linkMessageId: text("link_message_id").notNull().references(() => messages.id, { onDelete: "cascade" }),
+  dueAt: timestamp("due_at", { withTimezone: true }).notNull(),
+  status: text("status").notNull().default("pending"),
+  reason: text("reason"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const whatsappTemplates = pgTable("whatsapp_templates", {
   id: text("id")
     .primaryKey()
