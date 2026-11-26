@@ -32,3 +32,16 @@ it.each([
   expect(mock.deliver).toHaveBeenCalledWith("conversacion", { text: texto }, "agent");
   expect(mock.create).toHaveBeenCalledTimes(1);
 });
+
+it.each([
+  ["Mi ex me amenazó con hacerme daño y tengo miedo de ir a la audiencia", "riesgo_personal", "Emergencia: 133 y 149"],
+  ["Tengo audiencia mañana a las 9 y no tengo abogado, ¿pueden representarme?", "plazo_proximo", "Marcada urgente; no confirma representación"],
+])("deriva antes de consultar al modelo ante %s", async (texto, tipo, reply) => {
+  mock.select.mockReset();
+  mock.select.mockReturnValueOnce({ from: () => ({ where: () => ({ limit: async () => [{ id: "contacto", aiEnabled: true }] }) }) })
+    .mockReturnValueOnce({ from: () => ({ where: () => ({ orderBy: () => ({ limit: async () => [{ direction: "in", body: texto }] }) }) }) });
+  mock.execute.mockResolvedValue({ ok: true, stop: true, data: { tipoDerivacion: tipo } });
+  expect(await runAgentForConversation("conversacion")).toMatchObject({ ok: true, reason: "handoff", reply });
+  expect(mock.execute).toHaveBeenCalledWith("derivar_asesor", expect.objectContaining({ tipo }), expect.anything());
+  expect(mock.create).not.toHaveBeenCalled();
+});

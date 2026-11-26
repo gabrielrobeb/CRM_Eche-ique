@@ -102,8 +102,8 @@ export default definirConfig({
       seguimiento: { minutos: 30, mensaje: "¿Pudiste agendar tu consulta?", campoEstado: "estado_cita", estadosFinales: ["Agendada", "Realizada", "Cancelada"] },
     },
     mensajesDerivacion: {
-      riesgo_personal: "Lo que cuentas puede poner en riesgo tu seguridad. Si hay peligro inmediato, llama al 133 de Carabineros; para orientación por violencia intrafamiliar, al Fono Familia 149. No esperes la respuesta del estudio ante una emergencia. Dejé tu solicitud con prioridad para el equipo, sin prometer atención inmediata ni representación.",
-      plazo_proximo: "La fecha que indicas requiere atención urgente. Dejé tu solicitud marcada como urgente para que el equipo la revise con prioridad. Esto no confirma que podamos representarte ni suspende la audiencia o los plazos; no esperes una confirmación del estudio para buscar asistencia jurídica oportuna.",
+      riesgo_personal: "Tu seguridad es lo primero. Si hay peligro inmediato, llama al 133 de Carabineros; para orientación por violencia intrafamiliar, al Fono Familia 149. No esperes nuestra respuesta ante una emergencia. Te voy a derivar con alguien del equipo para que revise tu situación con prioridad.",
+      plazo_proximo: "Por la cercanía de tu audiencia o plazo, te voy a derivar con alguien del equipo para que revise tu solicitud lo antes posible. La fecha y los plazos siguen vigentes; esta derivación no confirma representación ni una hora de respuesta. No esperes nuestra respuesta para buscar asistencia jurídica oportuna.",
     },
     camposDerivacionUrgente: { urgencia: "Urgente" },
     mensajeDerivacion: "Dejé tu solicitud y el resumen para el equipo. Continuarán contigo para coordinar los próximos pasos; todavía no hay una hora reservada.",

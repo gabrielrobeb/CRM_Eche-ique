@@ -15,6 +15,7 @@ import { getBookingUrl } from "./agenda";
 import { registrarDatosConfirmados } from "./registro";
 import { asistenciaAgenda, REGLAS_ASISTENCIA_AGENDA, respuestaCuotasConsulta } from "./asistencia-agenda";
 import { programarSeguimientoAgenda } from "./seguimiento-agenda";
+import { detectarUrgencia } from "./urgencias";
 
 const MAX_TOOL_ROUNDS = 6;
 const HISTORY_LIMIT = 30;
@@ -66,6 +67,16 @@ export async function runAgentForConversation(conversationId: string): Promise<R
     contactId: contact.id, contactPhone: contact.phone,
     conversationId: conversation.id, channel,
   };
+  const urgente = detectarUrgencia(collapsed.at(-1)?.content ?? "");
+  if (urgente && getConfig().agente.mensajesDerivacion?.[urgente.tipo]) {
+    if (!config.enabledTools.includes("derivar_asesor")) return { ok: false, reason: "handoff_tool_disabled" };
+    const result = await executeTool("derivar_asesor", urgente, ctx);
+    if (!result.ok) return { ok: false, reason: result.error ?? "handoff_failed", toolCalls: 1 };
+    const reply = formatearRespuesta(mensajeDeDerivacion(getConfig().agente, urgente.tipo), channel);
+    const entrega = await deliverMessage(conversation.id, { text: reply }, "agent");
+    return { ok: entrega.ok, reply, toolCalls: 1,
+      reason: entrega.ok ? "handoff" : `send_failed: ${entrega.error ?? "unknown"}` };
+  }
   const toolRegistro = tools.find((t) => t.type === "function" && t.function.name === "actualizar_contacto");
   const registro = toolRegistro?.type === "function" ? await registrarDatosConfirmados({
     client, model: config.model, tool: toolRegistro, historial: collapsed,
